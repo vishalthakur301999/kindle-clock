@@ -371,57 +371,44 @@
         }
 
         .quote-card {
-            padding: 7px;
+            padding: 10px 12px;
             flex: 1;
             min-height: 70px;
-            display: grid;
-            grid-template-columns: 48px 1fr;
-            grid-template-rows: auto 1fr auto;
-            column-gap: 8px;
-            row-gap: 4px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            text-align: center;
             overflow: hidden;
         }
 
         .quote-title {
-            grid-column: 1 / span 2;
             font-family: Arial, Helvetica, sans-serif;
-            font-size: 0.9rem;
+            font-size: 0.82rem;
             font-weight: bold;
-            border-bottom: 1px solid #000;
-            padding-bottom: 3px;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            margin-bottom: 8px;
         }
 
-        .quote-image-wrap {
-            grid-column: 1;
-            grid-row: 2 / span 2;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
+        .quote-image-wrap,
         #quoteImage {
-            width: 46px;
-            height: 46px;
-            object-fit: cover;
-            border: 1px solid #000;
-            filter: grayscale(100%);
             display: none;
         }
 
         #quoteText {
-            grid-column: 2;
-            font-size: 0.95rem;
-            line-height: 1.16;
+            font-size: 1.08rem;
+            line-height: 1.22;
             font-weight: bold;
+            font-style: italic;
             overflow: hidden;
         }
 
         #quoteAuthor {
-            grid-column: 2;
+            margin-top: 8px;
             font-family: Arial, Helvetica, sans-serif;
-            font-size: 0.78rem;
+            font-size: 0.88rem;
             font-weight: bold;
-            text-align: right;
+            text-align: center;
         }
 
         .calendar-header {
@@ -539,25 +526,15 @@
             }
 
             #quoteText {
-                font-size: 0.82rem;
+                font-size: 0.92rem;
             }
 
             #quoteAuthor {
-                font-size: 0.68rem;
-            }
-
-            .quote-title {
                 font-size: 0.78rem;
             }
 
-            #quoteImage {
-                width: 38px;
-                height: 38px;
-            }
-
-            .quote-card {
-                grid-template-columns: 40px 1fr;
-                column-gap: 6px;
+            .quote-title {
+                font-size: 0.72rem;
             }
 
             .today {
@@ -639,9 +616,6 @@
 
             <section class="quote-card">
                 <div class="quote-title">Quote</div>
-                <div class="quote-image-wrap">
-                    <img id="quoteImage" alt="Quote author" />
-                </div>
                 <div id="quoteText">Loading quote...</div>
                 <div id="quoteAuthor">—</div>
             </section>
@@ -653,9 +627,9 @@
     const HARD_CODED_LATITUDE = 28.7039;
     const HARD_CODED_LONGITUDE = 77.0949;
 
-    // Put your Quoterism API key between the quotes below.
-    // Example: const QUOTERISM_API_KEY = "abc123-your-key";
-    const QUOTERISM_API_KEY = "qtr_8lslJgem6nJoqO4cFRX2ndnkYLxa2XWO";
+    // Quoterism is called through this Cloudflare Worker proxy.
+    // The API key should stay inside the Worker, not inside this Kindle page.
+    const QUOTERISM_PROXY_URL = "https://quiet-truth-46fd.old-smoke-1eab.workers.dev/";
 
     const screenElement = document.getElementById("screen");
     const settingsToggle = document.getElementById("settingsToggle");
@@ -674,7 +648,7 @@
     const weatherStatusElement = document.getElementById("weatherStatus");
     const quoteTextElement = document.getElementById("quoteText");
     const quoteAuthorElement = document.getElementById("quoteAuthor");
-    const quoteImageElement = document.getElementById("quoteImage");
+
 
     const dayNames = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
     const monthNames = [
@@ -871,8 +845,6 @@
     function setFallbackQuote(message) {
         quoteTextElement.textContent = message || "Add your Quoterism API key to show hourly quotes.";
         quoteAuthorElement.textContent = "Quoterism";
-        quoteImageElement.removeAttribute("src");
-        quoteImageElement.style.display = "none";
     }
 
     function pickQuoteFromResponse(data) {
@@ -930,12 +902,6 @@
     }
 
     async function fetchQuote(force) {
-        const apiKey = QUOTERISM_API_KEY.trim();
-        if (!apiKey || apiKey === "PASTE_YOUR_QUOTERISM_API_KEY_HERE") {
-            setFallbackQuote("Paste your Quoterism API key in the code to show quotes here.");
-            return;
-        }
-
         const istNow = getISTNow();
         const hourKey = `${istNow.getUTCFullYear()}-${istNow.getUTCMonth()}-${istNow.getUTCDate()}-${istNow.getUTCHours()}`;
 
@@ -944,12 +910,9 @@
         }
 
         try {
-            const response = await fetch("https://www.quoterism.com/api/quotes?", {
+            const response = await fetch(QUOTERISM_PROXY_URL, {
                 method: "GET",
-                headers: {
-                    "X-API-Key": apiKey,
-                    "Accept": "application/json"
-                }
+                cache: "no-store"
             });
 
             if (!response.ok) {
@@ -966,18 +929,10 @@
             quoteTextElement.textContent = `“${getQuoteText(quote)}”`;
             quoteAuthorElement.textContent = `— ${getQuoteAuthorName(quote)}`;
 
-            const imageUrl = getQuoteImageUrl(quote);
-            if (imageUrl) {
-                quoteImageElement.src = imageUrl;
-                quoteImageElement.style.display = "block";
-            } else {
-                quoteImageElement.removeAttribute("src");
-                quoteImageElement.style.display = "none";
-            }
 
             lastQuoteHourKey = hourKey;
         } catch (error) {
-            setFallbackQuote("Quote unavailable. Check API key or Wi‑Fi.");
+            setFallbackQuote("Quote unavailable. Check Worker, API key, or Wi‑Fi.");
         }
     }
 
