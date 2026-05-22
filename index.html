@@ -875,6 +875,60 @@
         quoteImageElement.style.display = "none";
     }
 
+    function pickQuoteFromResponse(data) {
+        // Handles common API shapes:
+        // 1) [quote, quote]
+        // 2) { quotes: [quote, quote] }
+        // 3) { data: [quote, quote] }
+        // 4) { results: [quote, quote] }
+        // 5) single quote object
+        let quotes = [];
+
+        if (Array.isArray(data)) {
+            quotes = data;
+        } else if (data && Array.isArray(data.quotes)) {
+            quotes = data.quotes;
+        } else if (data && Array.isArray(data.data)) {
+            quotes = data.data;
+        } else if (data && Array.isArray(data.results)) {
+            quotes = data.results;
+        } else if (data && typeof data === "object") {
+            quotes = [data];
+        }
+
+        if (!quotes.length) {
+            return null;
+        }
+
+        const istNow = getISTNow();
+        const index = (istNow.getUTCDate() * 24 + istNow.getUTCHours()) % quotes.length;
+        return quotes[index];
+    }
+
+    function getQuoteText(quote) {
+        return quote.text || quote.quote || quote.content || quote.body || "No quote text returned.";
+    }
+
+    function getQuoteAuthorName(quote) {
+        if (quote.author && typeof quote.author === "string") return quote.author;
+        if (quote.author && quote.author.name) return quote.author.name;
+        if (quote.person && quote.person.name) return quote.person.name;
+        if (quote.by) return quote.by;
+        if (quote.name) return quote.name;
+        return "Unknown";
+    }
+
+    function getQuoteImageUrl(quote) {
+        if (quote.author && quote.author.imageUrl) return quote.author.imageUrl;
+        if (quote.author && quote.author.image) return quote.author.image;
+        if (quote.person && quote.person.imageUrl) return quote.person.imageUrl;
+        if (quote.person && quote.person.image) return quote.person.image;
+        if (quote.imageUrl) return quote.imageUrl;
+        if (quote.image) return quote.image;
+        if (quote.authorImage) return quote.authorImage;
+        return "";
+    }
+
     async function fetchQuote(force) {
         const apiKey = QUOTERISM_API_KEY.trim();
         if (!apiKey || apiKey === "PASTE_YOUR_QUOTERISM_API_KEY_HERE") {
@@ -890,9 +944,11 @@
         }
 
         try {
-            const response = await fetch("https://www.quoterism.com/api/quotes/random", {
+            const response = await fetch("https://www.quoterism.com/api/quotes?", {
+                method: "GET",
                 headers: {
-                    "X-API-Key": apiKey
+                    "X-API-Key": apiKey,
+                    "Accept": "application/json"
                 }
             });
 
@@ -900,12 +956,19 @@
                 throw new Error("Quote service error");
             }
 
-            const quote = await response.json();
-            quoteTextElement.textContent = `“${quote.text || "No quote text returned."}”`;
-            quoteAuthorElement.textContent = quote.author && quote.author.name ? `— ${quote.author.name}` : "— Unknown";
+            const data = await response.json();
+            const quote = pickQuoteFromResponse(data);
 
-            if (quote.author && quote.author.imageUrl) {
-                quoteImageElement.src = quote.author.imageUrl;
+            if (!quote) {
+                throw new Error("No quote returned");
+            }
+
+            quoteTextElement.textContent = `“${getQuoteText(quote)}”`;
+            quoteAuthorElement.textContent = `— ${getQuoteAuthorName(quote)}`;
+
+            const imageUrl = getQuoteImageUrl(quote);
+            if (imageUrl) {
+                quoteImageElement.src = imageUrl;
                 quoteImageElement.style.display = "block";
             } else {
                 quoteImageElement.removeAttribute("src");
@@ -914,7 +977,7 @@
 
             lastQuoteHourKey = hourKey;
         } catch (error) {
-            setFallbackQuote("Quote unavailable. Check API key or Wi-Fi.");
+            setFallbackQuote("Quote unavailable. Check API key or Wi‑Fi.");
         }
     }
 
