@@ -103,19 +103,31 @@
         }
 
         body.landscape-layout #time {
-            font-size: 3.1rem;
+            font-size: 3.45rem;
         }
 
         body.landscape-layout #dateLine {
-            font-size: 0.78rem;
+            font-size: 0.92rem;
+        }
+
+        body.landscape-layout .weather-place {
+            font-size: 0.82rem;
+        }
+
+        body.landscape-layout .weather-label {
+            font-size: 0.66rem;
         }
 
         body.landscape-layout .weather-item {
-            min-height: 32px;
+            min-height: 36px;
         }
 
         body.landscape-layout .weather-value {
-            font-size: 0.78rem;
+            font-size: 0.95rem;
+        }
+
+        body.landscape-layout #weatherStatus {
+            font-size: 0.72rem;
         }
 
         body.landscape-layout .calendar-header {
@@ -124,21 +136,25 @@
         }
 
         body.landscape-layout #monthYear {
-            font-size: 1.05rem;
+            font-size: 1.25rem;
         }
 
-        body.landscape-layout .day-name {
-            min-height: 20px;
-            font-size: 0.58rem;
-        }
-
-        body.landscape-layout .day {
-            min-height: 27px;
+        body.landscape-layout .hint {
             font-size: 0.82rem;
         }
 
-        body.landscape-layout .today {
+        body.landscape-layout .day-name {
+            min-height: 22px;
+            font-size: 0.7rem;
+        }
+
+        body.landscape-layout .day {
+            min-height: 30px;
             font-size: 0.95rem;
+        }
+
+        body.landscape-layout .today {
+            font-size: 1.08rem;
         }
 
         .page {
@@ -152,7 +168,6 @@
             overflow: hidden;
         }
 
-        .tiny-button,
         button,
         select {
             border: 2px solid #000;
@@ -163,11 +178,16 @@
         }
 
         .tiny-button {
-            font-size: 1rem;
+            border: 0;
+            background: transparent;
+            color: #000;
+            font-family: Arial, Helvetica, sans-serif;
+            font-weight: bold;
+            font-size: 0.72rem;
             line-height: 1;
-            padding: 3px 6px;
-            min-width: 28px;
-            min-height: 26px;
+            padding: 2px 3px;
+            min-width: 0;
+            min-height: 0;
         }
 
         .settings-card,
@@ -226,9 +246,10 @@
 
         .settings-cog {
             position: absolute;
-            top: 4px;
+            top: 3px;
             left: 4px;
             z-index: 2;
+            text-decoration: underline;
         }
 
         .dashboard-main {
@@ -470,7 +491,7 @@
         </section>
 
         <section class="dashboard-card">
-            <button class="tiny-button settings-cog" id="settingsToggle" type="button" aria-label="Settings" title="Settings">⚙</button>
+            <button class="tiny-button settings-cog" id="settingsToggle" type="button" aria-label="Settings" title="Settings">SET</button>
             <div class="dashboard-main">
                 <div class="time-panel">
                     <div id="time">--:--</div>
