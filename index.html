@@ -110,6 +110,10 @@
             font-size: 0.92rem;
         }
 
+        body.landscape-layout #worldTimes {
+            font-size: 0.76rem;
+        }
+
         body.landscape-layout .weather-place {
             font-size: 0.82rem;
         }
@@ -278,9 +282,17 @@
         }
 
         #dateLine {
-            margin-top: 6px;
+            margin-top: 5px;
             font-size: 0.95rem;
             font-weight: bold;
+        }
+
+        #worldTimes {
+            margin-top: 5px;
+            font-family: Arial, Helvetica, sans-serif;
+            font-size: 0.78rem;
+            font-weight: bold;
+            line-height: 1.2;
         }
 
         .weather-panel {
@@ -426,6 +438,10 @@
                 font-size: 0.82rem;
             }
 
+            #worldTimes {
+                font-size: 0.68rem;
+            }
+
             .weather-value {
                 font-size: 0.82rem;
             }
@@ -495,6 +511,7 @@
             <div class="dashboard-main">
                 <div class="time-panel">
                     <div id="time">--:--</div>
+                    <div id="worldTimes">NY --:-- | Paris --:--</div>
                     <div id="dateLine">Loading date...</div>
                 </div>
 
@@ -541,6 +558,7 @@
     const timeFormatSelect = document.getElementById("timeFormatSelect");
     const timeElement = document.getElementById("time");
     const dateLineElement = document.getElementById("dateLine");
+    const worldTimesElement = document.getElementById("worldTimes");
     const monthYearElement = document.getElementById("monthYear");
     const calendarElement = document.getElementById("calendar");
     const temperatureElement = document.getElementById("temperature");
@@ -586,18 +604,40 @@
         return number.toString().padStart(2, "0");
     }
 
-    function formatTime(now) {
-        let hours = now.getHours();
-        const minutes = pad(now.getMinutes());
+    function getISTNow() {
+        // Kindle browsers may use the wrong device timezone.
+        // IST is fixed at UTC+5:30, so this keeps the main clock correct for India.
+        return new Date(Date.now() + 330 * 60 * 1000);
+    }
 
+    function formatTimeFromParts(hours, minutes) {
         if (timeFormat === "12") {
             const suffix = hours >= 12 ? "PM" : "AM";
-            hours = hours % 12;
-            if (hours === 0) hours = 12;
-            return `${hours}:${minutes} ${suffix}`;
+            let displayHours = hours % 12;
+            if (displayHours === 0) displayHours = 12;
+            return `${displayHours}:${pad(minutes)} ${suffix}`;
         }
 
-        return `${pad(hours)}:${minutes}`;
+        return `${pad(hours)}:${pad(minutes)}`;
+    }
+
+    function formatISTTime(istNow) {
+        return formatTimeFromParts(istNow.getUTCHours(), istNow.getUTCMinutes());
+    }
+
+    function formatWorldTime(timeZone) {
+        try {
+            const formatter = new Intl.DateTimeFormat("en-US", {
+                timeZone: timeZone,
+                hour: "numeric",
+                minute: "2-digit",
+                hour12: timeFormat === "12"
+            });
+
+            return formatter.format(new Date()).replace(" ", "");
+        } catch (error) {
+            return "--:--";
+        }
     }
 
     function applyOrientation(value) {
@@ -635,21 +675,25 @@
     }
 
     function updateClock() {
-        const now = new Date();
-        timeElement.textContent = formatTime(now);
+        const istNow = getISTNow();
+        const istDay = istNow.getUTCDay();
+        const istDate = istNow.getUTCDate();
+        const istMonth = istNow.getUTCMonth();
+        const istYear = istNow.getUTCFullYear();
 
-        const dayName = dayNames[now.getDay()];
-        const date = now.getDate();
-        const month = monthNames[now.getMonth()];
-        const year = now.getFullYear();
-        dateLineElement.textContent = `${dayName}, ${date} ${month} ${year}`;
+        timeElement.textContent = formatISTTime(istNow);
+        worldTimesElement.textContent = `NY ${formatWorldTime("America/New_York")} | Paris ${formatWorldTime("Europe/Paris")}`;
 
-        if (lastRenderedMonth !== now.getMonth() || lastRenderedYear !== now.getFullYear()) {
-            renderCalendar(now.getFullYear(), now.getMonth(), now.getDate());
-            lastRenderedMonth = now.getMonth();
-            lastRenderedYear = now.getFullYear();
+        const dayName = dayNames[istDay];
+        const month = monthNames[istMonth];
+        dateLineElement.textContent = `${dayName}, ${istDate} ${month} ${istYear}`;
+
+        if (lastRenderedMonth !== istMonth || lastRenderedYear !== istYear) {
+            renderCalendar(istYear, istMonth, istDate);
+            lastRenderedMonth = istMonth;
+            lastRenderedYear = istYear;
         } else {
-            highlightToday(now.getDate());
+            highlightToday(istDate);
         }
     }
 
