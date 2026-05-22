@@ -1,0 +1,690 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Kindle Clock, Weather & Calendar</title>
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        html,
+        body {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            min-height: 100%;
+            font-family: Georgia, "Times New Roman", serif;
+            background: #ffffff;
+            color: #000000;
+        }
+
+        body {
+            padding: 8px;
+            overflow: hidden;
+        }
+
+        .screen {
+            width: 100%;
+            min-height: 100vh;
+            transform-origin: center center;
+        }
+
+        body.orientation-portrait .screen {
+            transform: none;
+        }
+
+        body.orientation-portrait-inverted .screen {
+            transform: rotate(180deg);
+        }
+
+        body.orientation-landscape-left .screen,
+        body.orientation-landscape-right .screen {
+            width: 100vh;
+            min-height: 100vw;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+        }
+
+        body.orientation-landscape-left .screen {
+            transform: translate(-50%, -50%) rotate(90deg);
+        }
+
+        body.orientation-landscape-right .screen {
+            transform: translate(-50%, -50%) rotate(270deg);
+        }
+
+        body.landscape-layout .page {
+            max-width: none;
+            min-height: calc(100vh - 16px);
+            display: grid;
+            grid-template-columns: 0.9fr 1.1fr;
+            grid-template-rows: auto 1fr;
+            gap: 8px;
+        }
+
+        body.landscape-layout .settings-card {
+            grid-column: 1 / span 2;
+        }
+
+        body.landscape-layout .dashboard-card {
+            grid-column: 1;
+            grid-row: 2;
+            align-self: stretch;
+        }
+
+        body.landscape-layout .calendar-card {
+            grid-column: 2;
+            grid-row: 2;
+            align-self: stretch;
+        }
+
+        body.landscape-layout .dashboard-main {
+            height: 100%;
+            grid-template-columns: 1fr;
+            grid-template-rows: auto auto;
+        }
+
+        body.landscape-layout .time-panel {
+            border-right: 0;
+            border-bottom: 1px solid #000;
+            padding-right: 0;
+            padding-bottom: 8px;
+        }
+
+        body.landscape-layout #time {
+            font-size: 3.6rem;
+        }
+
+        body.landscape-layout .day {
+            min-height: 34px;
+        }
+
+        .page {
+            max-width: 600px;
+            margin: 0 auto;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .tiny-button,
+        button,
+        select {
+            border: 2px solid #000;
+            background: #fff;
+            color: #000;
+            font-family: Arial, Helvetica, sans-serif;
+            font-weight: bold;
+        }
+
+        .tiny-button {
+            font-size: 1rem;
+            line-height: 1;
+            padding: 3px 6px;
+            min-width: 28px;
+            min-height: 26px;
+        }
+
+        .settings-card,
+        .dashboard-card,
+        .calendar-card {
+            border: 2px solid #000;
+            background: #fff;
+        }
+
+        .settings-card {
+            display: none;
+            padding: 8px;
+        }
+
+        .settings-card.open {
+            display: block;
+        }
+
+        .settings-title {
+            font-size: 1rem;
+            font-weight: bold;
+            margin-bottom: 8px;
+            border-bottom: 1px solid #000;
+            padding-bottom: 5px;
+        }
+
+        .settings-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+
+        label {
+            font-weight: bold;
+            font-size: 0.9rem;
+        }
+
+        select,
+        button {
+            font-size: 0.9rem;
+            padding: 5px;
+        }
+
+        .small-note {
+            font-size: 0.78rem;
+            font-style: italic;
+            line-height: 1.25;
+        }
+
+        .dashboard-card {
+            padding: 8px;
+            position: relative;
+        }
+
+        .settings-cog {
+            position: absolute;
+            top: 4px;
+            left: 4px;
+            z-index: 2;
+        }
+
+        .dashboard-main {
+            display: grid;
+            grid-template-columns: 1.25fr 0.75fr;
+            gap: 8px;
+            align-items: stretch;
+        }
+
+        .time-panel {
+            text-align: center;
+            border-right: 1px solid #000;
+            padding-right: 8px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        #time {
+            font-family: Arial, Helvetica, sans-serif;
+            font-size: 4.15rem;
+            font-weight: bold;
+            letter-spacing: 1px;
+            line-height: 0.95;
+            white-space: nowrap;
+        }
+
+        #dateLine {
+            margin-top: 6px;
+            font-size: 0.95rem;
+            font-weight: bold;
+        }
+
+        .weather-panel {
+            display: grid;
+            grid-template-rows: auto 1fr auto;
+            gap: 5px;
+            min-width: 0;
+        }
+
+        .weather-place {
+            font-size: 0.72rem;
+            font-style: italic;
+            text-align: center;
+            border-bottom: 1px solid #000;
+            padding-bottom: 4px;
+        }
+
+        .weather-compact-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 4px;
+        }
+
+        .weather-item {
+            border: 1px solid #000;
+            padding: 4px 2px;
+            text-align: center;
+            min-height: 38px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .weather-item.wide {
+            grid-column: 1 / span 2;
+        }
+
+        .weather-label {
+            font-size: 0.58rem;
+            font-weight: bold;
+        }
+
+        .weather-value {
+            margin-top: 2px;
+            font-family: Arial, Helvetica, sans-serif;
+            font-size: 0.95rem;
+            font-weight: bold;
+            overflow-wrap: anywhere;
+        }
+
+        #weatherStatus {
+            font-size: 0.66rem;
+            font-style: italic;
+            text-align: center;
+        }
+
+        .calendar-card {
+            padding: 7px;
+            flex: 1;
+        }
+
+        .calendar-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid #000;
+            padding-bottom: 6px;
+            margin-bottom: 6px;
+        }
+
+        #monthYear {
+            font-size: 1.3rem;
+            font-weight: bold;
+        }
+
+        .hint {
+            font-size: 0.72rem;
+            font-style: italic;
+        }
+
+        .calendar-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            border-left: 1px solid #000;
+            border-top: 1px solid #000;
+        }
+
+        .day-name,
+        .day {
+            border-right: 1px solid #000;
+            border-bottom: 1px solid #000;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .day-name {
+            min-height: 25px;
+            font-weight: bold;
+            background: #eeeeee;
+            font-size: 0.72rem;
+        }
+
+        .day {
+            min-height: 38px;
+            font-size: 1rem;
+        }
+
+        .empty {
+            background: #f8f8f8;
+        }
+
+        .today {
+            background: #000;
+            color: #fff;
+            font-weight: bold;
+            font-size: 1.25rem;
+        }
+
+        @media (max-width: 430px) {
+            body {
+                padding: 6px;
+            }
+
+            .page {
+                gap: 6px;
+            }
+
+            .dashboard-main {
+                grid-template-columns: 1.18fr 0.82fr;
+                gap: 6px;
+            }
+
+            .time-panel {
+                padding-right: 6px;
+            }
+
+            #time {
+                font-size: 3.45rem;
+            }
+
+            #dateLine {
+                font-size: 0.82rem;
+            }
+
+            .weather-value {
+                font-size: 0.82rem;
+            }
+
+            .weather-label {
+                font-size: 0.52rem;
+            }
+
+            .weather-item {
+                min-height: 34px;
+            }
+
+            #monthYear {
+                font-size: 1.15rem;
+            }
+
+            .day-name {
+                min-height: 22px;
+                font-size: 0.62rem;
+            }
+
+            .day {
+                min-height: 32px;
+                font-size: 0.9rem;
+            }
+
+            .today {
+                font-size: 1.05rem;
+            }
+        }
+
+        @media print {
+            .settings-cog,
+            .settings-card {
+                display: none;
+            }
+        }
+    </style>
+</head>
+<body>
+<div class="screen" id="screen">
+    <main class="page">
+        <section class="settings-card" id="settingsCard">
+            <div class="settings-title">Display Settings</div>
+            <div class="settings-row">
+                <label for="orientationSelect">Orientation:</label>
+                <select id="orientationSelect">
+                    <option value="portrait">Portrait — normal</option>
+                    <option value="portrait-inverted">Portrait — upside down</option>
+                    <option value="landscape-left">Landscape — left side</option>
+                    <option value="landscape-right">Landscape — right side</option>
+                </select>
+            </div>
+            <div class="settings-row">
+                <label for="timeFormatSelect">Time:</label>
+                <select id="timeFormatSelect">
+                    <option value="24">24-hour</option>
+                    <option value="12">12-hour</option>
+                </select>
+                <button id="closeSettings" type="button">Close</button>
+            </div>
+            <div class="small-note">Settings are hidden by default. Orientation and time format are saved on this device.</div>
+        </section>
+
+        <section class="dashboard-card">
+            <button class="tiny-button settings-cog" id="settingsToggle" type="button" aria-label="Settings" title="Settings">⚙</button>
+            <div class="dashboard-main">
+                <div class="time-panel">
+                    <div id="time">--:--</div>
+                    <div id="dateLine">Loading date...</div>
+                </div>
+
+                <div class="weather-panel">
+                    <div class="weather-place">Rohini / 110085</div>
+                    <div class="weather-compact-grid">
+                        <div class="weather-item">
+                            <div class="weather-label">TEMP</div>
+                            <div class="weather-value" id="temperature">--°C</div>
+                        </div>
+                        <div class="weather-item">
+                            <div class="weather-label">WIND</div>
+                            <div class="weather-value" id="wind">--</div>
+                        </div>
+                        <div class="weather-item wide">
+                            <div class="weather-label">SKY</div>
+                            <div class="weather-value" id="weatherText">--</div>
+                        </div>
+                    </div>
+                    <div id="weatherStatus">Loading weather...</div>
+                </div>
+            </div>
+        </section>
+
+        <section class="calendar-card">
+            <div class="calendar-header">
+                <div id="monthYear">Month Year</div>
+                <div class="hint">Month</div>
+            </div>
+            <div class="calendar-grid" id="calendar"></div>
+        </section>
+    </main>
+</div>
+
+<script>
+    const HARD_CODED_LATITUDE = 28.7039;
+    const HARD_CODED_LONGITUDE = 77.0949;
+
+    const screenElement = document.getElementById("screen");
+    const settingsToggle = document.getElementById("settingsToggle");
+    const settingsCard = document.getElementById("settingsCard");
+    const closeSettings = document.getElementById("closeSettings");
+    const orientationSelect = document.getElementById("orientationSelect");
+    const timeFormatSelect = document.getElementById("timeFormatSelect");
+    const timeElement = document.getElementById("time");
+    const dateLineElement = document.getElementById("dateLine");
+    const monthYearElement = document.getElementById("monthYear");
+    const calendarElement = document.getElementById("calendar");
+    const temperatureElement = document.getElementById("temperature");
+    const windElement = document.getElementById("wind");
+    const weatherTextElement = document.getElementById("weatherText");
+    const weatherStatusElement = document.getElementById("weatherStatus");
+
+    const dayNames = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+    const monthNames = [
+        "January", "February", "March", "April", "May", "June",
+        "July", "August", "September", "October", "November", "December"
+    ];
+
+    const weatherDescriptions = {
+        0: "Clear",
+        1: "Clear",
+        2: "Cloudy",
+        3: "Cloudy",
+        45: "Fog",
+        48: "Fog",
+        51: "Drizzle",
+        53: "Drizzle",
+        55: "Drizzle",
+        61: "Rain",
+        63: "Rain",
+        65: "Rain",
+        71: "Snow",
+        73: "Snow",
+        75: "Snow",
+        80: "Showers",
+        81: "Showers",
+        82: "Showers",
+        95: "Storm",
+        96: "Storm",
+        99: "Storm"
+    };
+
+    let lastRenderedMonth = null;
+    let lastRenderedYear = null;
+    let timeFormat = "24";
+
+    function pad(number) {
+        return number.toString().padStart(2, "0");
+    }
+
+    function formatTime(now) {
+        let hours = now.getHours();
+        const minutes = pad(now.getMinutes());
+
+        if (timeFormat === "12") {
+            const suffix = hours >= 12 ? "PM" : "AM";
+            hours = hours % 12;
+            if (hours === 0) hours = 12;
+            return `${hours}:${minutes} ${suffix}`;
+        }
+
+        return `${pad(hours)}:${minutes}`;
+    }
+
+    function applyOrientation(value) {
+        document.body.classList.remove(
+            "orientation-portrait",
+            "orientation-portrait-inverted",
+            "orientation-landscape-left",
+            "orientation-landscape-right",
+            "landscape-layout"
+        );
+
+        document.body.classList.add(`orientation-${value}`);
+
+        if (value === "landscape-left" || value === "landscape-right") {
+            document.body.classList.add("landscape-layout");
+        }
+
+        localStorage.setItem("kindleOrientation", value);
+    }
+
+    function applyTimeFormat(value) {
+        timeFormat = value;
+        localStorage.setItem("kindleTimeFormat", value);
+        updateClock();
+    }
+
+    function loadSavedSettings() {
+        const savedOrientation = localStorage.getItem("kindleOrientation") || localStorage.getItem("kindleLayout") || "portrait";
+        const savedTimeFormat = localStorage.getItem("kindleTimeFormat") || "24";
+
+        orientationSelect.value = savedOrientation;
+        timeFormatSelect.value = savedTimeFormat;
+        timeFormat = savedTimeFormat;
+        applyOrientation(savedOrientation);
+    }
+
+    function updateClock() {
+        const now = new Date();
+        timeElement.textContent = formatTime(now);
+
+        const dayName = dayNames[now.getDay()];
+        const date = now.getDate();
+        const month = monthNames[now.getMonth()];
+        const year = now.getFullYear();
+        dateLineElement.textContent = `${dayName}, ${date} ${month} ${year}`;
+
+        if (lastRenderedMonth !== now.getMonth() || lastRenderedYear !== now.getFullYear()) {
+            renderCalendar(now.getFullYear(), now.getMonth(), now.getDate());
+            lastRenderedMonth = now.getMonth();
+            lastRenderedYear = now.getFullYear();
+        } else {
+            highlightToday(now.getDate());
+        }
+    }
+
+    function renderCalendar(year, month, todayDate) {
+        calendarElement.innerHTML = "";
+        monthYearElement.textContent = `${monthNames[month]} ${year}`;
+
+        dayNames.forEach(day => {
+            const cell = document.createElement("div");
+            cell.className = "day-name";
+            cell.textContent = day;
+            calendarElement.appendChild(cell);
+        });
+
+        const firstDay = new Date(year, month, 1).getDay();
+        const daysInMonth = new Date(year, month + 1, 0).getDate();
+
+        for (let i = 0; i < firstDay; i++) {
+            const emptyCell = document.createElement("div");
+            emptyCell.className = "day empty";
+            calendarElement.appendChild(emptyCell);
+        }
+
+        for (let date = 1; date <= daysInMonth; date++) {
+            const cell = document.createElement("div");
+            cell.className = "day";
+            cell.textContent = date;
+            cell.dataset.date = date;
+
+            if (date === todayDate) {
+                cell.classList.add("today");
+            }
+
+            calendarElement.appendChild(cell);
+        }
+    }
+
+    function highlightToday(todayDate) {
+        document.querySelectorAll(".day[data-date]").forEach(cell => {
+            cell.classList.toggle("today", Number(cell.dataset.date) === todayDate);
+        });
+    }
+
+    async function fetchWeather() {
+        weatherStatusElement.textContent = "Loading weather...";
+
+        const url = `https://api.open-meteo.com/v1/forecast?latitude=${HARD_CODED_LATITUDE}&longitude=${HARD_CODED_LONGITUDE}&current_weather=true&timezone=auto`;
+
+        try {
+            const response = await fetch(url);
+            if (!response.ok) {
+                throw new Error("Weather service error");
+            }
+
+            const data = await response.json();
+            const current = data.current_weather;
+
+            temperatureElement.textContent = `${Math.round(current.temperature)}°C`;
+            windElement.textContent = `${Math.round(current.windspeed)} km/h`;
+            weatherTextElement.textContent = weatherDescriptions[current.weathercode] || "OK";
+
+            const updateTime = new Date(current.time);
+            weatherStatusElement.textContent = `Updated ${pad(updateTime.getHours())}:${pad(updateTime.getMinutes())}`;
+        } catch (error) {
+            weatherStatusElement.textContent = "Weather unavailable. Check Wi‑Fi.";
+        }
+    }
+
+    settingsToggle.addEventListener("click", () => {
+        settingsCard.classList.toggle("open");
+    });
+
+    closeSettings.addEventListener("click", () => {
+        settingsCard.classList.remove("open");
+    });
+
+    orientationSelect.addEventListener("change", () => {
+        applyOrientation(orientationSelect.value);
+    });
+
+    timeFormatSelect.addEventListener("change", () => {
+        applyTimeFormat(timeFormatSelect.value);
+    });
+
+    loadSavedSettings();
+    updateClock();
+    fetchWeather();
+
+    // Updates every minute and aligns close to the next minute change.
+    const millisecondsUntilNextMinute = (60 - new Date().getSeconds()) * 1000;
+    setTimeout(() => {
+        updateClock();
+        setInterval(updateClock, 60 * 1000);
+    }, millisecondsUntilNextMinute);
+
+    // Weather refreshes every 30 minutes.
+    setInterval(fetchWeather, 30 * 60 * 1000);
+</script>
+</body>
+</html>
