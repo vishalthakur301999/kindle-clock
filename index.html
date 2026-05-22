@@ -21,13 +21,15 @@
         }
 
         body {
-            padding: 8px;
+            padding: 0;
             overflow: hidden;
         }
 
         .screen {
-            width: 100%;
-            min-height: 100vh;
+            width: 100vw;
+            height: 100vh;
+            padding: 6px;
+            overflow: hidden;
             transform-origin: center center;
         }
 
@@ -42,8 +44,9 @@
         body.orientation-landscape-left .screen,
         body.orientation-landscape-right .screen {
             width: 100vh;
-            min-height: 100vw;
-            position: absolute;
+            height: 100vw;
+            min-height: 0;
+            position: fixed;
             top: 50%;
             left: 50%;
         }
@@ -57,12 +60,15 @@
         }
 
         body.landscape-layout .page {
+            width: 100%;
+            height: 100%;
             max-width: none;
-            min-height: calc(100vh - 16px);
+            min-height: 0;
             display: grid;
-            grid-template-columns: 0.9fr 1.1fr;
+            grid-template-columns: 0.82fr 1.18fr;
             grid-template-rows: auto 1fr;
-            gap: 8px;
+            gap: 6px;
+            overflow: hidden;
         }
 
         body.landscape-layout .settings-card {
@@ -73,12 +79,14 @@
             grid-column: 1;
             grid-row: 2;
             align-self: stretch;
+            overflow: hidden;
         }
 
         body.landscape-layout .calendar-card {
             grid-column: 2;
             grid-row: 2;
             align-self: stretch;
+            overflow: hidden;
         }
 
         body.landscape-layout .dashboard-main {
@@ -95,20 +103,53 @@
         }
 
         body.landscape-layout #time {
-            font-size: 3.6rem;
+            font-size: 3.1rem;
+        }
+
+        body.landscape-layout #dateLine {
+            font-size: 0.78rem;
+        }
+
+        body.landscape-layout .weather-item {
+            min-height: 32px;
+        }
+
+        body.landscape-layout .weather-value {
+            font-size: 0.78rem;
+        }
+
+        body.landscape-layout .calendar-header {
+            padding-bottom: 4px;
+            margin-bottom: 4px;
+        }
+
+        body.landscape-layout #monthYear {
+            font-size: 1.05rem;
+        }
+
+        body.landscape-layout .day-name {
+            min-height: 20px;
+            font-size: 0.58rem;
         }
 
         body.landscape-layout .day {
-            min-height: 34px;
+            min-height: 27px;
+            font-size: 0.82rem;
+        }
+
+        body.landscape-layout .today {
+            font-size: 0.95rem;
         }
 
         .page {
             max-width: 600px;
+            height: 100%;
             margin: 0 auto;
-            min-height: 100vh;
+            min-height: 0;
             display: flex;
             flex-direction: column;
             gap: 8px;
+            overflow: hidden;
         }
 
         .tiny-button,
@@ -339,8 +380,8 @@
         }
 
         @media (max-width: 430px) {
-            body {
-                padding: 6px;
+            .screen {
+                padding: 5px;
             }
 
             .page {
