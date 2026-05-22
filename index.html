@@ -82,10 +82,18 @@
             overflow: hidden;
         }
 
-        body.landscape-layout .calendar-card {
+        body.landscape-layout .right-column {
             grid-column: 2;
             grid-row: 2;
             align-self: stretch;
+            display: grid;
+            grid-template-rows: auto 1fr;
+            gap: 6px;
+            overflow: hidden;
+        }
+
+        body.landscape-layout .calendar-card {
+            align-self: start;
             overflow: hidden;
         }
 
@@ -107,31 +115,31 @@
         }
 
         body.landscape-layout #dateLine {
-            font-size: 1.12rem;
+            font-size: 1.23rem;
         }
 
         body.landscape-layout #worldTimes {
-            font-size: 1rem;
+            font-size: 1.1rem;
         }
 
         body.landscape-layout .weather-place {
-            font-size: 1rem;
+            font-size: 1.1rem;
         }
 
         body.landscape-layout .weather-label {
-            font-size: 0.82rem;
+            font-size: 0.9rem;
         }
 
         body.landscape-layout .weather-item {
-            min-height: 41px;
+            min-height: 43px;
         }
 
         body.landscape-layout .weather-value {
-            font-size: 1.18rem;
+            font-size: 1.3rem;
         }
 
         body.landscape-layout #weatherStatus {
-            font-size: 0.9rem;
+            font-size: 0.99rem;
         }
 
         body.landscape-layout .calendar-header {
@@ -153,8 +161,8 @@
         }
 
         body.landscape-layout .day {
-            min-height: 31px;
-            font-size: 1.05rem;
+            min-height: 26px;
+            font-size: 1.02rem;
         }
 
         body.landscape-layout .today {
@@ -196,7 +204,8 @@
 
         .settings-card,
         .dashboard-card,
-        .calendar-card {
+        .calendar-card,
+        .quote-card {
             border: 2px solid #000;
             background: #fff;
         }
@@ -283,14 +292,14 @@
 
         #dateLine {
             margin-top: 5px;
-            font-size: 1.2rem;
+            font-size: 1.32rem;
             font-weight: bold;
         }
 
         #worldTimes {
             margin-top: 5px;
             font-family: Arial, Helvetica, sans-serif;
-            font-size: 1.05rem;
+            font-size: 1.16rem;
             font-weight: bold;
             line-height: 1.2;
         }
@@ -303,7 +312,7 @@
         }
 
         .weather-place {
-            font-size: 0.95rem;
+            font-size: 1.05rem;
             font-style: italic;
             text-align: center;
             border-bottom: 1px solid #000;
@@ -331,27 +340,88 @@
         }
 
         .weather-label {
-            font-size: 0.78rem;
+            font-size: 0.86rem;
             font-weight: bold;
         }
 
         .weather-value {
             margin-top: 2px;
             font-family: Arial, Helvetica, sans-serif;
-            font-size: 1.22rem;
+            font-size: 1.34rem;
             font-weight: bold;
             overflow-wrap: anywhere;
         }
 
         #weatherStatus {
-            font-size: 0.88rem;
+            font-size: 0.97rem;
             font-style: italic;
             text-align: center;
         }
 
         .calendar-card {
             padding: 7px;
+            flex: 0 0 auto;
+        }
+
+        .right-column {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            min-height: 0;
+        }
+
+        .quote-card {
+            padding: 7px;
             flex: 1;
+            min-height: 70px;
+            display: grid;
+            grid-template-columns: 48px 1fr;
+            grid-template-rows: auto 1fr auto;
+            column-gap: 8px;
+            row-gap: 4px;
+            overflow: hidden;
+        }
+
+        .quote-title {
+            grid-column: 1 / span 2;
+            font-family: Arial, Helvetica, sans-serif;
+            font-size: 0.9rem;
+            font-weight: bold;
+            border-bottom: 1px solid #000;
+            padding-bottom: 3px;
+        }
+
+        .quote-image-wrap {
+            grid-column: 1;
+            grid-row: 2 / span 2;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        #quoteImage {
+            width: 46px;
+            height: 46px;
+            object-fit: cover;
+            border: 1px solid #000;
+            filter: grayscale(100%);
+            display: none;
+        }
+
+        #quoteText {
+            grid-column: 2;
+            font-size: 0.95rem;
+            line-height: 1.16;
+            font-weight: bold;
+            overflow: hidden;
+        }
+
+        #quoteAuthor {
+            grid-column: 2;
+            font-family: Arial, Helvetica, sans-serif;
+            font-size: 0.78rem;
+            font-weight: bold;
+            text-align: right;
         }
 
         .calendar-header {
@@ -397,8 +467,8 @@
         }
 
         .day {
-            min-height: 40px;
-            font-size: 1.12rem;
+            min-height: 32px;
+            font-size: 1.08rem;
         }
 
         .empty {
@@ -435,19 +505,19 @@
             }
 
             #dateLine {
-                font-size: 0.95rem;
+                font-size: 1.05rem;
             }
 
             #worldTimes {
-                font-size: 0.82rem;
+                font-size: 0.9rem;
             }
 
             .weather-value {
-                font-size: 0.98rem;
+                font-size: 1.08rem;
             }
 
             .weather-label {
-                font-size: 0.66rem;
+                font-size: 0.72rem;
             }
 
             .weather-item {
@@ -464,8 +534,30 @@
             }
 
             .day {
-                min-height: 32px;
-                font-size: 0.9rem;
+                min-height: 28px;
+                font-size: 0.88rem;
+            }
+
+            #quoteText {
+                font-size: 0.82rem;
+            }
+
+            #quoteAuthor {
+                font-size: 0.68rem;
+            }
+
+            .quote-title {
+                font-size: 0.78rem;
+            }
+
+            #quoteImage {
+                width: 38px;
+                height: 38px;
+            }
+
+            .quote-card {
+                grid-template-columns: 40px 1fr;
+                column-gap: 6px;
             }
 
             .today {
@@ -536,19 +628,34 @@
             </div>
         </section>
 
-        <section class="calendar-card">
-            <div class="calendar-header">
-                <div id="monthYear">Month Year</div>
-                <div class="hint">Month</div>
-            </div>
-            <div class="calendar-grid" id="calendar"></div>
-        </section>
+        <div class="right-column">
+            <section class="calendar-card">
+                <div class="calendar-header">
+                    <div id="monthYear">Month Year</div>
+                    <div class="hint">Month</div>
+                </div>
+                <div class="calendar-grid" id="calendar"></div>
+            </section>
+
+            <section class="quote-card">
+                <div class="quote-title">Quote</div>
+                <div class="quote-image-wrap">
+                    <img id="quoteImage" alt="Quote author" />
+                </div>
+                <div id="quoteText">Loading quote...</div>
+                <div id="quoteAuthor">—</div>
+            </section>
+        </div>
     </main>
 </div>
 
 <script>
     const HARD_CODED_LATITUDE = 28.7039;
     const HARD_CODED_LONGITUDE = 77.0949;
+
+    // Put your Quoterism API key between the quotes below.
+    // Example: const QUOTERISM_API_KEY = "abc123-your-key";
+    const QUOTERISM_API_KEY = "qtr_8lslJgem6nJoqO4cFRX2ndnkYLxa2XWO";
 
     const screenElement = document.getElementById("screen");
     const settingsToggle = document.getElementById("settingsToggle");
@@ -565,6 +672,9 @@
     const windElement = document.getElementById("wind");
     const weatherTextElement = document.getElementById("weatherText");
     const weatherStatusElement = document.getElementById("weatherStatus");
+    const quoteTextElement = document.getElementById("quoteText");
+    const quoteAuthorElement = document.getElementById("quoteAuthor");
+    const quoteImageElement = document.getElementById("quoteImage");
 
     const dayNames = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
     const monthNames = [
@@ -596,11 +706,13 @@
         99: "Storm"
     };
 
+
     let lastRenderedMonth = null;
     let lastRenderedYear = null;
     let timeFormat = "24";
     let wakeLock = null;
     let refreshSignal = 0;
+    let lastQuoteHourKey = "";
 
     function pad(number) {
         return number.toString().padStart(2, "0");
@@ -756,6 +868,56 @@
         });
     }
 
+    function setFallbackQuote(message) {
+        quoteTextElement.textContent = message || "Add your Quoterism API key to show hourly quotes.";
+        quoteAuthorElement.textContent = "Quoterism";
+        quoteImageElement.removeAttribute("src");
+        quoteImageElement.style.display = "none";
+    }
+
+    async function fetchQuote(force) {
+        const apiKey = QUOTERISM_API_KEY.trim();
+        if (!apiKey || apiKey === "PASTE_YOUR_QUOTERISM_API_KEY_HERE") {
+            setFallbackQuote("Paste your Quoterism API key in the code to show quotes here.");
+            return;
+        }
+
+        const istNow = getISTNow();
+        const hourKey = `${istNow.getUTCFullYear()}-${istNow.getUTCMonth()}-${istNow.getUTCDate()}-${istNow.getUTCHours()}`;
+
+        if (!force && lastQuoteHourKey === hourKey) {
+            return;
+        }
+
+        try {
+            const response = await fetch("https://www.quoterism.com/api/quotes/random", {
+                headers: {
+                    "X-API-Key": apiKey
+                }
+            });
+
+            if (!response.ok) {
+                throw new Error("Quote service error");
+            }
+
+            const quote = await response.json();
+            quoteTextElement.textContent = `“${quote.text || "No quote text returned."}”`;
+            quoteAuthorElement.textContent = quote.author && quote.author.name ? `— ${quote.author.name}` : "— Unknown";
+
+            if (quote.author && quote.author.imageUrl) {
+                quoteImageElement.src = quote.author.imageUrl;
+                quoteImageElement.style.display = "block";
+            } else {
+                quoteImageElement.removeAttribute("src");
+                quoteImageElement.style.display = "none";
+            }
+
+            lastQuoteHourKey = hourKey;
+        } catch (error) {
+            setFallbackQuote("Quote unavailable. Check API key or Wi-Fi.");
+        }
+    }
+
     async function fetchWeather() {
         weatherStatusElement.textContent = "Loading weather...";
 
@@ -776,6 +938,7 @@
 
             const updateTime = new Date(current.time);
             weatherStatusElement.textContent = `Updated ${pad(updateTime.getHours())}:${pad(updateTime.getMinutes())}`;
+            fetchQuote(false);
         } catch (error) {
             weatherStatusElement.textContent = "Weather unavailable. Check Wi‑Fi.";
         }
@@ -811,6 +974,7 @@
 
     loadSavedSettings();
     updateClock();
+    fetchQuote(true);
     fetchWeather();
     tryKeepAwake();
 
@@ -821,6 +985,7 @@
         tinyRefreshSignal();
         setInterval(() => {
             updateClock();
+            fetchQuote(false);
             tinyRefreshSignal();
             tryKeepAwake();
         }, 60 * 1000);
