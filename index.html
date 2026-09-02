@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Kindle Clock, Weather & Calendar</title>
+    <title>Kindle Almanac — Clock, Weather & Calendar</title>
     <style>
         * {
             box-sizing: border-box;
@@ -14,21 +14,20 @@
             margin: 0;
             padding: 0;
             width: 100%;
-            min-height: 100%;
+            height: 100%;
             font-family: Georgia, "Times New Roman", serif;
             background: #ffffff;
             color: #000000;
         }
 
         body {
-            padding: 0;
             overflow: hidden;
         }
 
         .screen {
             width: 100vw;
             height: 100vh;
-            padding: 6px;
+            padding: 4px;
             overflow: hidden;
             transform-origin: center center;
         }
@@ -41,11 +40,11 @@
             transform: rotate(180deg);
         }
 
+        /* Rotated modes swap the box: the content is laid out wide, then turned. */
         body.orientation-landscape-left .screen,
         body.orientation-landscape-right .screen {
             width: 100vh;
             height: 100vw;
-            min-height: 0;
             position: fixed;
             top: 50%;
             left: 50%;
@@ -59,409 +58,314 @@
             transform: translate(-50%, -50%) rotate(270deg);
         }
 
-        body.landscape-layout .page {
-            width: 100%;
-            height: 100%;
-            max-width: none;
-            min-height: 0;
-            display: grid;
-            grid-template-columns: 0.82fr 1.18fr;
-            grid-template-rows: auto 1fr;
-            gap: 6px;
-            overflow: hidden;
-        }
-
-        body.landscape-layout .settings-card {
-            grid-column: 1 / span 2;
-        }
-
-        body.landscape-layout .dashboard-card {
-            grid-column: 1;
-            grid-row: 2;
-            align-self: stretch;
-            overflow: hidden;
-        }
-
-        body.landscape-layout .right-column {
-            grid-column: 2;
-            grid-row: 2;
-            align-self: stretch;
-            display: grid;
-            grid-template-rows: 1.05fr 0.95fr;
-            gap: 6px;
-            overflow: hidden;
-        }
-
-        body.landscape-layout .calendar-card {
-            height: 100%;
-            align-self: stretch;
-            overflow: hidden;
-            display: flex;
-            flex-direction: column;
-        }
-
-        body.landscape-layout .calendar-grid {
-            flex: 1;
-            grid-auto-rows: 1fr;
-        }
-
-        body.landscape-layout .dashboard-main {
-            height: 100%;
-            grid-template-columns: 1fr;
-            grid-template-rows: auto auto;
-        }
-
-        body.landscape-layout .time-panel {
-            border-right: 0;
-            border-bottom: 1px solid #000;
-            padding-right: 0;
-            padding-bottom: 8px;
-        }
-
-        body.landscape-layout #time {
-            font-size: 6rem;
-        }
-
-        body.landscape-layout #dateLine {
-            font-size: 1.5rem;
-        }
-
-        body.landscape-layout #worldTimes {
-            font-size: 1.5rem;
-        }
-
-        body.landscape-layout .weather-place {
-            font-size: 1.1rem;
-        }
-
-        body.landscape-layout .weather-label {
-            font-size: 0.9rem;
-        }
-
-        body.landscape-layout .weather-item {
-            min-height: 43px;
-        }
-
-        body.landscape-layout .weather-value {
-            font-size: 2rem;
-        }
-
-        body.landscape-layout #weatherStatus {
-            font-size: 0.99rem;
-        }
-
-        body.landscape-layout .calendar-header {
-            padding-bottom: 4px;
-            margin-bottom: 4px;
-        }
-
-        body.landscape-layout #monthYear {
-            font-size: 2.5rem;
-        }
-
-        body.landscape-layout .hint {
-            font-size: 0.95rem;
-        }
-
-        body.landscape-layout .day-name {
-            min-height: 0;
-            font-size: 0.88rem;
-        }
-
-        body.landscape-layout .day {
-            min-height: 0;
-            font-size: 1.18rem;
-        }
-
-        body.landscape-layout .today {
-            font-size: 1.34rem;
-        }
-
-        body.landscape-layout .quote-card {
-            padding: 10px 16px;
-        }
-
-        body.landscape-layout .quote-title {
-            font-size: 0.9rem;
-            margin-bottom: 10px;
-        }
-
-        body.landscape-layout #quoteText {
-            font-size: 1.18rem;
-            line-height: 1.22;
-        }
-
-        body.landscape-layout #quoteAuthor {
-            font-size: 0.98rem;
-            margin-top: 10px;
-        }
+        /* ---------- Page frame ---------- */
 
         .page {
-            max-width: 600px;
+            position: relative;
+            width: 100%;
             height: 100%;
             margin: 0 auto;
-            min-height: 0;
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
+            padding: 6px 8px 7px;
+            border: 2px solid #000;
+            display: grid;
+            grid-template-rows: auto 1fr auto auto auto;
+            gap: 5px;
             overflow: hidden;
         }
 
-        button,
-        select {
-            border: 2px solid #000;
-            background: #fff;
-            color: #000;
+        /* The tall layout is narrow by nature; the wide one uses the full panel. */
+        body.portrait-layout .page {
+            max-width: 640px;
+        }
+
+        /* ---------- Shared type ---------- */
+
+        .section-head {
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+            border-bottom: 1px solid #000;
+            padding-bottom: 3px;
+            margin-bottom: 5px;
+        }
+
+        .section-title {
             font-family: Arial, Helvetica, sans-serif;
+            font-size: 0.68rem;
             font-weight: bold;
+            letter-spacing: 0.22em;
+            text-transform: uppercase;
+        }
+
+        .section-note {
+            font-size: 0.74rem;
+            font-style: italic;
+        }
+
+        /* ---------- Masthead ---------- */
+
+        .masthead {
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+            border-bottom: 3px solid #000;
+            padding-bottom: 4px;
+        }
+
+        .masthead-date {
+            font-family: Arial, Helvetica, sans-serif;
+            font-size: 0.86rem;
+            font-weight: bold;
+            letter-spacing: 0.13em;
+            text-transform: uppercase;
+            white-space: nowrap;
+            overflow: hidden;
+        }
+
+        .masthead-right {
+            display: flex;
+            align-items: baseline;
+            white-space: nowrap;
+        }
+
+        .masthead-meta {
+            font-size: 0.72rem;
+            font-style: italic;
+            letter-spacing: 0.06em;
+            text-transform: uppercase;
         }
 
         .tiny-button {
-            border: 0;
-            background: transparent;
+            border: 1px solid #000;
+            background: #fff;
             color: #000;
             font-family: Arial, Helvetica, sans-serif;
             font-weight: bold;
-            font-size: 0.72rem;
+            font-size: 0.6rem;
+            letter-spacing: 0.1em;
             line-height: 1;
-            padding: 2px 3px;
-            min-width: 0;
-            min-height: 0;
+            padding: 3px 4px;
+            margin-left: 8px;
         }
 
-        .settings-card,
-        .dashboard-card,
-        .calendar-card,
-        .quote-card {
-            border: 2px solid #000;
-            background: #fff;
-        }
+        /* ---------- Clock ---------- */
 
-        .settings-card {
-            display: none;
-            padding: 8px;
-        }
-
-        .settings-card.open {
-            display: block;
-        }
-
-        .settings-title {
-            font-size: 1rem;
-            font-weight: bold;
-            margin-bottom: 8px;
-            border-bottom: 1px solid #000;
-            padding-bottom: 5px;
-        }
-
-        .settings-row {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 8px;
-            align-items: center;
-            margin-bottom: 8px;
-        }
-
-        label {
-            font-weight: bold;
-            font-size: 0.9rem;
-        }
-
-        select,
-        button {
-            font-size: 0.9rem;
-            padding: 5px;
-        }
-
-        .small-note {
-            font-size: 0.78rem;
-            font-style: italic;
-            line-height: 1.25;
-        }
-
-        .dashboard-card {
-            padding: 8px;
-            position: relative;
-        }
-
-        .settings-cog {
-            position: absolute;
-            top: 3px;
-            left: 4px;
-            z-index: 2;
-            text-decoration: underline;
-        }
-
-        .dashboard-main {
-            display: grid;
-            grid-template-columns: 1.25fr 0.75fr;
-            gap: 8px;
-            align-items: stretch;
-        }
-
-        .time-panel {
-            text-align: center;
-            border-right: 1px solid #000;
-            padding-right: 8px;
+        .clock-block {
             display: flex;
             flex-direction: column;
+            min-height: 0;
+            overflow: hidden;
+        }
+
+        /* The clock face takes every pixel the rest of the page does not need,
+           and fitClock() scales the digits to fill it. */
+        .clock-face {
+            flex: 1;
+            min-height: 0;
+            display: flex;
+            align-items: center;
             justify-content: center;
+            overflow: hidden;
         }
 
         #time {
             font-family: Arial, Helvetica, sans-serif;
-            font-size: 5.5rem;
             font-weight: bold;
-            letter-spacing: 1px;
-            line-height: 0.95;
             white-space: nowrap;
+            line-height: 0.84;
         }
 
-        #dateLine {
-            margin-top: 5px;
-            font-size: 1.32rem;
-            font-weight: bold;
+        #timeText {
+            display: inline-block;
+            line-height: 0.84;
+            letter-spacing: -0.02em;
         }
 
-        #worldTimes {
-            margin-top: 5px;
-            font-family: Arial, Helvetica, sans-serif;
-            font-size: 1.5rem;
-            font-weight: bold;
-            line-height: 1.2;
-        }
-
-        .weather-panel {
+        .clock-rail {
             display: grid;
-            grid-template-rows: auto 1fr auto;
-            gap: 5px;
-            min-width: 0;
-        }
-
-        .weather-place {
-            font-size: 1.05rem;
-            font-style: italic;
-            text-align: center;
+            grid-template-columns: repeat(3, 1fr);
+            border-top: 1px solid #000;
             border-bottom: 1px solid #000;
-            padding-bottom: 4px;
-        }
-
-        .weather-compact-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 4px;
-        }
-
-        .weather-item {
-            border: 1px solid #000;
-            padding: 4px 2px;
-            text-align: center;
-            min-height: 38px;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-        }
-
-        .weather-item.wide {
-            grid-column: 1 / span 2;
-        }
-
-        .weather-label {
-            font-size: 0.86rem;
-            font-weight: bold;
-        }
-
-        .weather-value {
-            margin-top: 2px;
-            font-family: Arial, Helvetica, sans-serif;
-            font-size: 1.34rem;
-            font-weight: bold;
-            overflow-wrap: anywhere;
-        }
-
-        #weatherStatus {
-            font-size: 0.97rem;
-            font-style: italic;
-            text-align: center;
-        }
-
-        .calendar-card {
-            padding: 7px;
+            padding: 4px 0 3px;
             flex: 0 0 auto;
         }
 
-        .right-column {
+        .rail-item {
+            text-align: center;
+            border-right: 1px solid #000;
+        }
+
+        .rail-item:last-child {
+            border-right: 0;
+        }
+
+        .rail-label {
+            display: block;
+            font-family: Arial, Helvetica, sans-serif;
+            font-size: 0.62rem;
+            font-weight: bold;
+            letter-spacing: 0.16em;
+        }
+
+        .rail-value {
+            display: block;
+            font-family: Arial, Helvetica, sans-serif;
+            font-size: 1.16rem;
+            font-weight: bold;
+            line-height: 1.15;
+        }
+
+        /* ---------- Weather ---------- */
+
+        .weather-block {
             display: flex;
             flex-direction: column;
-            gap: 8px;
             min-height: 0;
         }
 
-        .quote-card {
-            padding: 10px 12px;
+        .weather-top {
             flex: 1;
-            min-height: 70px;
+            display: grid;
+            grid-template-columns: 0.85fr 1.65fr;
+            gap: 8px;
+            align-items: stretch;
+        }
+
+        .weather-now {
+            text-align: center;
+            border-right: 1px solid #000;
+            padding-right: 6px;
             display: flex;
             flex-direction: column;
             justify-content: center;
-            text-align: center;
-            overflow: hidden;
         }
 
-        .quote-title {
+        #temperature {
             font-family: Arial, Helvetica, sans-serif;
-            font-size: 0.82rem;
+            font-size: 3.2rem;
             font-weight: bold;
-            letter-spacing: 1px;
+            line-height: 0.88;
+            letter-spacing: -1px;
+        }
+
+        #weatherText {
+            font-family: Arial, Helvetica, sans-serif;
+            font-size: 0.76rem;
+            font-weight: bold;
+            letter-spacing: 0.1em;
             text-transform: uppercase;
-            margin-bottom: 8px;
+            margin-top: 5px;
+            line-height: 1.15;
         }
 
-        .quote-image-wrap,
-        #quoteImage {
-            display: none;
+        .stat-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            grid-auto-rows: 1fr;
+            gap: 4px;
         }
 
-        #quoteText {
-            font-size: 1.08rem;
-            line-height: 1.22;
-            font-weight: bold;
-            font-style: italic;
-            overflow: hidden;
-        }
-
-        #quoteAuthor {
-            margin-top: 8px;
-            font-family: Arial, Helvetica, sans-serif;
-            font-size: 0.88rem;
-            font-weight: bold;
+        .stat {
+            border: 1px solid #000;
+            padding: 3px 1px 4px;
             text-align: center;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
         }
 
-        .calendar-header {
+        .stat-label {
+            font-family: Arial, Helvetica, sans-serif;
+            font-size: 0.62rem;
+            font-weight: bold;
+            letter-spacing: 0.16em;
+        }
+
+        .stat-value {
+            font-family: Arial, Helvetica, sans-serif;
+            font-size: 1.04rem;
+            font-weight: bold;
+            line-height: 1.1;
+            margin-top: 2px;
+            overflow-wrap: anywhere;
+        }
+
+        .stat-value.small {
+            font-size: 0.84rem;
+        }
+
+        .status-row {
             display: flex;
             justify-content: space-between;
-            align-items: center;
-            border-bottom: 1px solid #000;
-            padding-bottom: 6px;
-            margin-bottom: 6px;
+            align-items: baseline;
+            margin-top: 5px;
+            border-top: 1px solid #000;
+            padding-top: 3px;
+            font-size: 0.7rem;
+            font-style: italic;
+            flex: 0 0 auto;
         }
 
-        #monthYear {
-            font-size: 1.48rem;
+        /* ---------- Forecast ---------- */
+
+        .forecast {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            border: 1px solid #000;
+        }
+
+        .fc {
+            text-align: center;
+            padding: 4px 2px 5px;
+            border-right: 1px solid #000;
+        }
+
+        .fc:last-child {
+            border-right: 0;
+        }
+
+        .fc-day {
+            font-family: Arial, Helvetica, sans-serif;
+            font-size: 0.62rem;
+            font-weight: bold;
+            letter-spacing: 0.16em;
+        }
+
+        .fc-sky {
+            font-size: 0.72rem;
+            font-style: italic;
+            line-height: 1.15;
+            margin: 2px 0 1px;
+        }
+
+        .fc-temp {
+            font-family: Arial, Helvetica, sans-serif;
+            font-size: 0.94rem;
             font-weight: bold;
         }
 
-        .hint {
-            font-size: 0.72rem;
-            font-style: italic;
+        .fc-temp .low {
+            font-weight: normal;
+        }
+
+        /* ---------- Calendar ---------- */
+
+        .calendar-block {
+            display: flex;
+            flex-direction: column;
+            min-height: 0;
+            overflow: hidden;
         }
 
         .calendar-grid {
+            flex: 1;
             display: grid;
             grid-template-columns: repeat(7, 1fr);
+            grid-template-rows: auto;
+            grid-auto-rows: 1fr;
             border-left: 1px solid #000;
             border-top: 1px solid #000;
+            min-height: 0;
         }
 
         .day-name,
@@ -473,104 +377,214 @@
             align-items: center;
         }
 
-        .day-name {
-            min-height: 26px;
+        .calendar-grid .day-name {
+            font-family: Arial, Helvetica, sans-serif;
+            padding: 5px 0;
             font-weight: bold;
-            background: #eeeeee;
-            font-size: 0.82rem;
+            font-size: 0.62rem;
+            letter-spacing: 0.16em;
+            background: #e8e8e8;
         }
 
         .day {
-            min-height: 32px;
-            font-size: 1.08rem;
+            min-height: 30px;
+            font-size: 1.04rem;
         }
 
         .empty {
-            background: #f8f8f8;
+            background: #f6f6f6;
         }
 
         .today {
             background: #000;
             color: #fff;
+            font-family: Arial, Helvetica, sans-serif;
             font-weight: bold;
-            font-size: 1.38rem;
+            font-size: 1.2rem;
         }
 
+        /* ---------- Settings overlay ---------- */
+
+        .settings-card {
+            display: none;
+            position: absolute;
+            top: 8px;
+            left: 10px;
+            right: 10px;
+            z-index: 5;
+            border: 2px solid #000;
+            background: #fff;
+            padding: 9px;
+        }
+
+        .settings-card.open {
+            display: block;
+        }
+
+        .settings-title {
+            font-family: Arial, Helvetica, sans-serif;
+            font-size: 0.72rem;
+            font-weight: bold;
+            letter-spacing: 0.2em;
+            text-transform: uppercase;
+            margin-bottom: 8px;
+            border-bottom: 1px solid #000;
+            padding-bottom: 5px;
+        }
+
+        .settings-row {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+
+        .settings-row label {
+            font-family: Arial, Helvetica, sans-serif;
+            font-weight: bold;
+            font-size: 0.76rem;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            margin-right: 8px;
+        }
+
+        .settings-row select,
+        .settings-row button {
+            border: 2px solid #000;
+            background: #fff;
+            color: #000;
+            font-family: Arial, Helvetica, sans-serif;
+            font-weight: bold;
+            font-size: 0.85rem;
+            padding: 4px 6px;
+            margin-right: 8px;
+        }
+
+        .small-note {
+            font-size: 0.74rem;
+            font-style: italic;
+            line-height: 1.3;
+        }
+
+        /* ---------- Wide layout (Kindle on its side) ---------- */
+
+        body.landscape-layout .page {
+            grid-template-columns: 1fr 1fr;
+            grid-template-rows: auto 1fr auto auto;
+            gap: 6px 12px;
+        }
+
+        body.landscape-layout .masthead {
+            grid-column: 1 / span 2;
+            grid-row: 1;
+        }
+
+        body.landscape-layout .clock-block {
+            grid-column: 1 / span 2;
+            grid-row: 2;
+        }
+
+        body.landscape-layout .weather-block {
+            grid-column: 1;
+            grid-row: 3;
+        }
+
+        body.landscape-layout .forecast-block {
+            grid-column: 1;
+            grid-row: 4;
+        }
+
+        body.landscape-layout .calendar-block {
+            grid-column: 2;
+            grid-row: 3 / span 2;
+            border-left: 1px solid #000;
+            padding-left: 12px;
+        }
+
+        body.landscape-layout .rail-value {
+            font-size: 1.24rem;
+        }
+
+        body.landscape-layout #temperature {
+            font-size: 2.9rem;
+        }
+
+        body.landscape-layout .day {
+            min-height: 26px;
+            font-size: 1.02rem;
+        }
+
+        body.landscape-layout .today {
+            font-size: 1.18rem;
+        }
+
+        /* ---------- Small panels ---------- */
+
         @media (max-width: 430px) {
-            .screen {
-                padding: 5px;
-            }
-
             .page {
-                gap: 6px;
+                padding: 5px 6px 6px;
+                gap: 4px;
             }
 
-            .dashboard-main {
-                grid-template-columns: 1.18fr 0.82fr;
-                gap: 6px;
+            .masthead-date {
+                font-size: 0.7rem;
+                letter-spacing: 0.08em;
             }
 
-            .time-panel {
-                padding-right: 6px;
-            }
-
-            #time {
-                font-size: 4rem;
-            }
-
-            #dateLine {
-                font-size: 1.05rem;
-            }
-
-            #worldTimes {
-                font-size: 1.2rem;
-            }
-
-            .weather-value {
-                font-size: 1.08rem;
-            }
-
-            .weather-label {
-                font-size: 0.72rem;
-            }
-
-            .weather-item {
-                min-height: 34px;
-            }
-
-            #monthYear {
-                font-size: 1.15rem;
-            }
-
-            .day-name {
-                min-height: 22px;
+            .masthead-meta {
                 font-size: 0.62rem;
             }
 
+            .rail-value {
+                font-size: 0.98rem;
+            }
+
+            .rail-label {
+                font-size: 0.56rem;
+                letter-spacing: 0.1em;
+            }
+
+            #temperature {
+                font-size: 2.5rem;
+            }
+
+            #weatherText {
+                font-size: 0.66rem;
+            }
+
+            .stat-label {
+                font-size: 0.56rem;
+                letter-spacing: 0.1em;
+            }
+
+            .stat-value {
+                font-size: 0.86rem;
+            }
+
+            .stat-value.small {
+                font-size: 0.7rem;
+            }
+
+            .fc-sky {
+                font-size: 0.64rem;
+            }
+
+            .fc-temp {
+                font-size: 0.82rem;
+            }
+
             .day {
-                min-height: 28px;
-                font-size: 0.88rem;
-            }
-
-            #quoteText {
-                font-size: 0.92rem;
-            }
-
-            #quoteAuthor {
-                font-size: 0.78rem;
-            }
-
-            .quote-title {
-                font-size: 0.72rem;
+                min-height: 22px;
+                font-size: 0.9rem;
             }
 
             .today {
-                font-size: 1.05rem;
+                font-size: 1.04rem;
             }
         }
 
         @media print {
-            .settings-cog,
+            .tiny-button,
             .settings-card {
                 display: none;
             }
@@ -583,70 +597,113 @@
         <section class="settings-card" id="settingsCard">
             <div class="settings-title">Display Settings</div>
             <div class="settings-row">
-                <label for="orientationSelect">Orientation:</label>
+                <label for="orientationSelect">Rotation</label>
                 <select id="orientationSelect">
-                    <option value="portrait">Portrait — normal</option>
-                    <option value="portrait-inverted">Portrait — upside down</option>
-                    <option value="landscape-left">Landscape — left side</option>
-                    <option value="landscape-right">Landscape — right side</option>
+                    <option value="portrait">None — upright</option>
+                    <option value="portrait-inverted">Upside down</option>
+                    <option value="landscape-left">Turn left (90&deg;)</option>
+                    <option value="landscape-right">Turn right (270&deg;)</option>
                 </select>
             </div>
             <div class="settings-row">
-                <label for="timeFormatSelect">Time:</label>
+                <label for="timeFormatSelect">Time</label>
                 <select id="timeFormatSelect">
                     <option value="24">24-hour</option>
                     <option value="12">12-hour</option>
                 </select>
                 <button id="closeSettings" type="button">Close</button>
             </div>
-            <div class="small-note">Settings are hidden by default. Orientation and time format are saved on this device.</div>
+            <div class="small-note">Rotation only turns the page. The wide two-column layout switches on automatically whenever the screen is wider than it is tall, so pick whichever rotation makes the text upright for you.</div>
         </section>
 
-        <section class="dashboard-card">
-            <button class="tiny-button settings-cog" id="settingsToggle" type="button" aria-label="Settings" title="Settings">SET</button>
-            <div class="dashboard-main">
-                <div class="time-panel">
-                    <div id="time">--:--</div>
-                    <div id="worldTimes">NY --:-- | Paris --:--</div>
-                    <div id="dateLine">Loading date...</div>
-                </div>
+        <header class="masthead">
+            <div class="masthead-date" id="dateLine">Loading date</div>
+            <div class="masthead-right">
+                <span class="masthead-meta" id="almanacMeta">&nbsp;</span>
+                <button class="tiny-button" id="settingsToggle" type="button" aria-label="Settings" title="Settings">SET</button>
+            </div>
+        </header>
 
-                <div class="weather-panel">
-                    <div class="weather-place">Rohini / 110085</div>
-                    <div class="weather-compact-grid">
-                        <div class="weather-item">
-                            <div class="weather-label">TEMP</div>
-                            <div class="weather-value" id="temperature">--°C</div>
-                        </div>
-                        <div class="weather-item">
-                            <div class="weather-label">WIND</div>
-                            <div class="weather-value" id="wind">--</div>
-                        </div>
-                        <div class="weather-item wide">
-                            <div class="weather-label">SKY</div>
-                            <div class="weather-value" id="weatherText">--</div>
-                        </div>
-                    </div>
-                    <div id="weatherStatus">Loading weather...</div>
+        <section class="clock-block">
+            <div class="clock-face" id="clockFace">
+                <div id="time"><span id="timeText">--:--</span></div>
+            </div>
+            <div class="clock-rail">
+                <div class="rail-item">
+                    <span class="rail-label">NEW YORK</span>
+                    <span class="rail-value" id="nyTime">--:--</span>
+                </div>
+                <div class="rail-item">
+                    <span class="rail-label">PARIS</span>
+                    <span class="rail-value" id="parisTime">--:--</span>
+                </div>
+                <div class="rail-item">
+                    <span class="rail-label">UTC</span>
+                    <span class="rail-value" id="utcTime">--:--</span>
                 </div>
             </div>
         </section>
 
-        <div class="right-column">
-            <section class="calendar-card">
-                <div class="calendar-header">
-                    <div id="monthYear">Month Year</div>
-                    <div class="hint">Month</div>
-                </div>
-                <div class="calendar-grid" id="calendar"></div>
-            </section>
+        <section class="weather-block">
+            <div class="section-head">
+                <span class="section-title">Weather</span>
+                <span class="section-note">Rohini &middot; 110085</span>
+            </div>
 
-            <section class="quote-card">
-                <div class="quote-title">Quote</div>
-                <div id="quoteText">Loading quote...</div>
-                <div id="quoteAuthor">—</div>
-            </section>
-        </div>
+            <div class="weather-top">
+                <div class="weather-now">
+                    <div id="temperature">--&deg;</div>
+                    <div id="weatherText">Loading</div>
+                </div>
+                <div class="stat-grid">
+                    <div class="stat">
+                        <div class="stat-label">FEELS</div>
+                        <div class="stat-value" id="feelsLike">--</div>
+                    </div>
+                    <div class="stat">
+                        <div class="stat-label">HIGH</div>
+                        <div class="stat-value" id="todayHigh">--</div>
+                    </div>
+                    <div class="stat">
+                        <div class="stat-label">LOW</div>
+                        <div class="stat-value" id="todayLow">--</div>
+                    </div>
+                    <div class="stat">
+                        <div class="stat-label">WIND</div>
+                        <div class="stat-value small" id="wind">--</div>
+                    </div>
+                    <div class="stat">
+                        <div class="stat-label">HUMIDITY</div>
+                        <div class="stat-value" id="humidity">--</div>
+                    </div>
+                    <div class="stat">
+                        <div class="stat-label">AIR (AQI)</div>
+                        <div class="stat-value small" id="airQuality">--</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="status-row">
+                <span id="sunLine">Sunrise --:-- &middot; Sunset --:--</span>
+                <span id="weatherStatus">Loading weather</span>
+            </div>
+        </section>
+
+        <section class="forecast-block">
+            <div class="section-head">
+                <span class="section-title">Outlook</span>
+                <span class="section-note">Next three days</span>
+            </div>
+            <div class="forecast" id="forecast"></div>
+        </section>
+
+        <section class="calendar-block">
+            <div class="section-head">
+                <span class="section-title" id="monthYear">Month Year</span>
+                <span class="section-note" id="monthNote">&nbsp;</span>
+            </div>
+            <div class="calendar-grid" id="calendar"></div>
+        </section>
     </main>
 </div>
 
@@ -654,9 +711,17 @@
     const HARD_CODED_LATITUDE = 28.7039;
     const HARD_CODED_LONGITUDE = 77.0949;
 
-    // Quoterism is called through this Cloudflare Worker proxy.
-    // The API key should stay inside the Worker, not inside this Kindle page.
-    const QUOTERISM_PROXY_URL = "https://quiet-truth-46fd.old-smoke-1eab.workers.dev/";
+    const WEATHER_URL = "https://api.open-meteo.com/v1/forecast"
+        + "?latitude=" + HARD_CODED_LATITUDE
+        + "&longitude=" + HARD_CODED_LONGITUDE
+        + "&current=temperature_2m,relative_humidity_2m,apparent_temperature,weather_code,wind_speed_10m"
+        + "&daily=weather_code,temperature_2m_max,temperature_2m_min,sunrise,sunset"
+        + "&timezone=auto&forecast_days=4";
+
+    const AIR_URL = "https://air-quality-api.open-meteo.com/v1/air-quality"
+        + "?latitude=" + HARD_CODED_LATITUDE
+        + "&longitude=" + HARD_CODED_LONGITUDE
+        + "&current=us_aqi&timezone=auto";
 
     const screenElement = document.getElementById("screen");
     const settingsToggle = document.getElementById("settingsToggle");
@@ -664,56 +729,108 @@
     const closeSettings = document.getElementById("closeSettings");
     const orientationSelect = document.getElementById("orientationSelect");
     const timeFormatSelect = document.getElementById("timeFormatSelect");
-    const timeElement = document.getElementById("time");
-    const dateLineElement = document.getElementById("dateLine");
-    const worldTimesElement = document.getElementById("worldTimes");
-    const monthYearElement = document.getElementById("monthYear");
-    const calendarElement = document.getElementById("calendar");
-    const temperatureElement = document.getElementById("temperature");
-    const windElement = document.getElementById("wind");
-    const weatherTextElement = document.getElementById("weatherText");
-    const weatherStatusElement = document.getElementById("weatherStatus");
-    const quoteTextElement = document.getElementById("quoteText");
-    const quoteAuthorElement = document.getElementById("quoteAuthor");
 
+    const clockFaceElement = document.getElementById("clockFace");
+    const timeElement = document.getElementById("time");
+    const timeTextElement = document.getElementById("timeText");
+    const dateLineElement = document.getElementById("dateLine");
+    const almanacMetaElement = document.getElementById("almanacMeta");
+    const nyTimeElement = document.getElementById("nyTime");
+    const parisTimeElement = document.getElementById("parisTime");
+    const utcTimeElement = document.getElementById("utcTime");
+
+    const monthYearElement = document.getElementById("monthYear");
+    const monthNoteElement = document.getElementById("monthNote");
+    const calendarElement = document.getElementById("calendar");
+
+    const temperatureElement = document.getElementById("temperature");
+    const weatherTextElement = document.getElementById("weatherText");
+    const feelsLikeElement = document.getElementById("feelsLike");
+    const todayHighElement = document.getElementById("todayHigh");
+    const todayLowElement = document.getElementById("todayLow");
+    const windElement = document.getElementById("wind");
+    const humidityElement = document.getElementById("humidity");
+    const airQualityElement = document.getElementById("airQuality");
+    const forecastElement = document.getElementById("forecast");
+    const sunLineElement = document.getElementById("sunLine");
+    const weatherStatusElement = document.getElementById("weatherStatus");
 
     const dayNames = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
     const monthNames = [
         "January", "February", "March", "April", "May", "June",
         "July", "August", "September", "October", "November", "December"
     ];
+    const fullDayNames = [
+        "Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"
+    ];
 
     const weatherDescriptions = {
+        0: "Clear Sky",
+        1: "Mainly Clear",
+        2: "Partly Cloudy",
+        3: "Overcast",
+        45: "Fog",
+        48: "Rime Fog",
+        51: "Light Drizzle",
+        53: "Drizzle",
+        55: "Heavy Drizzle",
+        56: "Freezing Drizzle",
+        57: "Freezing Drizzle",
+        61: "Light Rain",
+        63: "Rain",
+        65: "Heavy Rain",
+        66: "Freezing Rain",
+        67: "Freezing Rain",
+        71: "Light Snow",
+        73: "Snow",
+        75: "Heavy Snow",
+        77: "Snow Grains",
+        80: "Showers",
+        81: "Showers",
+        82: "Heavy Showers",
+        85: "Snow Showers",
+        86: "Snow Showers",
+        95: "Thunderstorm",
+        96: "Storm & Hail",
+        99: "Storm & Hail"
+    };
+
+    const shortWeatherDescriptions = {
         0: "Clear",
         1: "Clear",
-        2: "Cloudy",
-        3: "Cloudy",
+        2: "Part Cloud",
+        3: "Overcast",
         45: "Fog",
         48: "Fog",
         51: "Drizzle",
         53: "Drizzle",
         55: "Drizzle",
-        61: "Rain",
+        56: "Icy Drizzle",
+        57: "Icy Drizzle",
+        61: "Light Rain",
         63: "Rain",
-        65: "Rain",
-        71: "Snow",
+        65: "Heavy Rain",
+        66: "Icy Rain",
+        67: "Icy Rain",
+        71: "Light Snow",
         73: "Snow",
-        75: "Snow",
+        75: "Heavy Snow",
+        77: "Snow",
         80: "Showers",
         81: "Showers",
         82: "Showers",
+        85: "Snow Show.",
+        86: "Snow Show.",
         95: "Storm",
         96: "Storm",
         99: "Storm"
     };
-
 
     let lastRenderedMonth = null;
     let lastRenderedYear = null;
     let timeFormat = "24";
     let wakeLock = null;
     let refreshSignal = 0;
-    let lastQuoteHourKey = "";
 
     function pad(number) {
         return number.toString().padStart(2, "0");
@@ -766,34 +883,76 @@
                 hour12: timeFormat === "12"
             });
 
-            return formatter.format(new Date()).replace(" ", "");
+            return formatter.format(new Date()).replace(/^24:/, "00:");
         } catch (error) {
             return "--:--";
         }
     }
+
+    /* ---------------- Layout ---------------- */
 
     function applyOrientation(value) {
         document.body.classList.remove(
             "orientation-portrait",
             "orientation-portrait-inverted",
             "orientation-landscape-left",
-            "orientation-landscape-right",
-            "landscape-layout"
+            "orientation-landscape-right"
         );
 
         document.body.classList.add(`orientation-${value}`);
+        localStorage.setItem("kindleOrientation", value);
+        updateLayoutMode();
+    }
 
-        if (value === "landscape-left" || value === "landscape-right") {
-            document.body.classList.add("landscape-layout");
+    // The layout follows the shape of the panel, not the rotation setting.
+    // A Kindle resting on its side reports a wide viewport whether or not the
+    // page is being rotated by CSS, and either way it should get two columns.
+    function updateLayoutMode() {
+        const wide = screenElement.clientWidth > screenElement.clientHeight;
+        document.body.classList.toggle("landscape-layout", wide);
+        document.body.classList.toggle("portrait-layout", !wide);
+        fitClock();
+    }
+
+    // Scales the digits until they fill the space the rest of the page left over.
+    // offsetWidth/offsetHeight are pre-transform, so this stays correct while the
+    // whole screen is rotated by CSS.
+    let lastFitKey = "";
+
+    function fitClock(force) {
+        const availableWidth = clockFaceElement.clientWidth;
+        const availableHeight = clockFaceElement.clientHeight;
+
+        if (!availableWidth || !availableHeight) {
+            return;
         }
 
-        localStorage.setItem("kindleOrientation", value);
+        const fitKey = `${timeTextElement.textContent.length}|${availableWidth}x${availableHeight}`;
+        if (!force && fitKey === lastFitKey) {
+            return;
+        }
+
+        const probe = 100;
+        timeElement.style.fontSize = probe + "px";
+
+        const textWidth = timeTextElement.offsetWidth;
+        const textHeight = timeTextElement.offsetHeight;
+
+        if (!textWidth || !textHeight) {
+            return;
+        }
+
+        const scale = Math.min(availableWidth / textWidth, availableHeight / textHeight);
+        timeElement.style.fontSize = Math.max(28, Math.floor(probe * scale * 0.97)) + "px";
+        lastFitKey = fitKey;
     }
 
     function applyTimeFormat(value) {
         timeFormat = value;
         localStorage.setItem("kindleTimeFormat", value);
         updateClock();
+        renderSunLine();
+        fitClock(true);
     }
 
     function loadSavedSettings() {
@@ -806,6 +965,20 @@
         applyOrientation(savedOrientation);
     }
 
+    /* ---------------- Clock, date, almanac line ---------------- */
+
+    function dayOfYear(year, month, date) {
+        return Math.floor((Date.UTC(year, month, date) - Date.UTC(year, 0, 1)) / 86400000) + 1;
+    }
+
+    function isoWeekNumber(year, month, date) {
+        const target = new Date(Date.UTC(year, month, date));
+        const weekday = target.getUTCDay() || 7;
+        target.setUTCDate(target.getUTCDate() + 4 - weekday);
+        const yearStart = Date.UTC(target.getUTCFullYear(), 0, 1);
+        return Math.ceil(((target.getTime() - yearStart) / 86400000 + 1) / 7);
+    }
+
     function updateClock() {
         const istNow = getISTNow();
         const istDay = istNow.getUTCDay();
@@ -813,12 +986,13 @@
         const istMonth = istNow.getUTCMonth();
         const istYear = istNow.getUTCFullYear();
 
-        timeElement.textContent = formatISTTime(istNow);
-        worldTimesElement.textContent = `NY ${formatWorldTime("America/New_York")} | Paris ${formatWorldTime("Europe/Paris")}`;
+        timeTextElement.textContent = formatISTTime(istNow);
+        nyTimeElement.textContent = formatWorldTime("America/New_York");
+        parisTimeElement.textContent = formatWorldTime("Europe/Paris");
+        utcTimeElement.textContent = formatWorldTime("UTC");
 
-        const dayName = dayNames[istDay];
-        const month = monthNames[istMonth];
-        dateLineElement.textContent = `${dayName}, ${istDate} ${month} ${istYear}`;
+        dateLineElement.textContent = `${fullDayNames[istDay]}, ${istDate} ${monthNames[istMonth]} ${istYear}`;
+        almanacMetaElement.textContent = `Week ${isoWeekNumber(istYear, istMonth, istDate)} · Day ${dayOfYear(istYear, istMonth, istDate)}`;
 
         if (lastRenderedMonth !== istMonth || lastRenderedYear !== istYear) {
             renderCalendar(istYear, istMonth, istDate);
@@ -827,6 +1001,14 @@
         } else {
             highlightToday(istDate);
         }
+
+        const daysInMonth = new Date(Date.UTC(istYear, istMonth + 1, 0)).getUTCDate();
+        const daysLeft = daysInMonth - istDate;
+        monthNoteElement.textContent = daysLeft === 0
+            ? "Last day of the month"
+            : `${daysLeft} ${daysLeft === 1 ? "day" : "days"} left`;
+
+        fitClock();
     }
 
     function renderCalendar(year, month, todayDate) {
@@ -836,12 +1018,12 @@
         dayNames.forEach(day => {
             const cell = document.createElement("div");
             cell.className = "day-name";
-            cell.textContent = day;
+            cell.textContent = day.toUpperCase();
             calendarElement.appendChild(cell);
         });
 
-        const firstDay = new Date(year, month, 1).getDay();
-        const daysInMonth = new Date(year, month + 1, 0).getDate();
+        const firstDay = new Date(Date.UTC(year, month, 1)).getUTCDay();
+        const daysInMonth = new Date(Date.UTC(year, month + 1, 0)).getUTCDate();
 
         for (let i = 0; i < firstDay; i++) {
             const emptyCell = document.createElement("div");
@@ -861,6 +1043,15 @@
 
             calendarElement.appendChild(cell);
         }
+
+        // Pad the final week so the grid keeps clean, even rows.
+        const trailing = (7 - ((firstDay + daysInMonth) % 7)) % 7;
+
+        for (let i = 0; i < trailing; i++) {
+            const emptyCell = document.createElement("div");
+            emptyCell.className = "day empty";
+            calendarElement.appendChild(emptyCell);
+        }
     }
 
     function highlightToday(todayDate) {
@@ -869,125 +1060,144 @@
         });
     }
 
-    function setFallbackQuote(message) {
-        quoteTextElement.textContent = message || "Add your Quoterism API key to show hourly quotes.";
-        quoteAuthorElement.textContent = "Quoterism";
+    /* ---------------- Weather ---------------- */
+
+    let sunriseText = "--:--";
+    let sunsetText = "--:--";
+
+    function describeWeather(code) {
+        return weatherDescriptions[code] || "Unavailable";
     }
 
-    function pickQuoteFromResponse(data) {
-        // Handles common API shapes:
-        // 1) [quote, quote]
-        // 2) { quotes: [quote, quote] }
-        // 3) { data: [quote, quote] }
-        // 4) { results: [quote, quote] }
-        // 5) single quote object
-        let quotes = [];
+    function describeWeatherShort(code) {
+        return shortWeatherDescriptions[code] || "--";
+    }
 
-        if (Array.isArray(data)) {
-            quotes = data;
-        } else if (data && Array.isArray(data.quotes)) {
-            quotes = data.quotes;
-        } else if (data && Array.isArray(data.data)) {
-            quotes = data.data;
-        } else if (data && Array.isArray(data.results)) {
-            quotes = data.results;
-        } else if (data && typeof data === "object") {
-            quotes = [data];
-        }
+    function aqiLabel(value) {
+        if (value <= 50) return "Good";
+        if (value <= 100) return "Fair";
+        if (value <= 150) return "Poor";
+        if (value <= 200) return "Bad";
+        if (value <= 300) return "Severe";
+        return "Hazard";
+    }
 
-        if (!quotes.length) {
-            return null;
+    function forecastDayLabel(offset) {
+        if (offset === 1) {
+            return "TOMORROW";
         }
 
         const istNow = getISTNow();
-        const index = (istNow.getUTCDate() * 24 + istNow.getUTCHours()) % quotes.length;
-        return quotes[index];
+        const target = new Date(Date.UTC(istNow.getUTCFullYear(), istNow.getUTCMonth(), istNow.getUTCDate() + offset));
+        return dayNames[target.getUTCDay()].toUpperCase();
     }
 
-    function getQuoteText(quote) {
-        return quote.text || quote.quote || quote.content || quote.body || "No quote text returned.";
-    }
+    function renderForecast(daily) {
+        forecastElement.innerHTML = "";
 
-    function getQuoteAuthorName(quote) {
-        if (quote.author && typeof quote.author === "string") return quote.author;
-        if (quote.author && quote.author.name) return quote.author.name;
-        if (quote.person && quote.person.name) return quote.person.name;
-        if (quote.by) return quote.by;
-        if (quote.name) return quote.name;
-        return "Unknown";
-    }
+        for (let offset = 1; offset <= 3; offset++) {
+            const hasData = daily && daily.time && offset < daily.time.length;
 
-    function getQuoteImageUrl(quote) {
-        if (quote.author && quote.author.imageUrl) return quote.author.imageUrl;
-        if (quote.author && quote.author.image) return quote.author.image;
-        if (quote.person && quote.person.imageUrl) return quote.person.imageUrl;
-        if (quote.person && quote.person.image) return quote.person.image;
-        if (quote.imageUrl) return quote.imageUrl;
-        if (quote.image) return quote.image;
-        if (quote.authorImage) return quote.authorImage;
-        return "";
-    }
+            const cell = document.createElement("div");
+            cell.className = "fc";
 
-    async function fetchQuote(force) {
-        const istNow = getISTNow();
-        const hourKey = `${istNow.getUTCFullYear()}-${istNow.getUTCMonth()}-${istNow.getUTCDate()}-${istNow.getUTCHours()}`;
+            const dayLabel = document.createElement("div");
+            dayLabel.className = "fc-day";
+            dayLabel.textContent = forecastDayLabel(offset);
 
-        if (!force && lastQuoteHourKey === hourKey) {
-            return;
+            const sky = document.createElement("div");
+            sky.className = "fc-sky";
+            sky.textContent = hasData ? describeWeatherShort(daily.weather_code[offset]) : "\u2014";
+
+            const temp = document.createElement("div");
+            temp.className = "fc-temp";
+            temp.innerHTML = hasData
+                ? `${Math.round(daily.temperature_2m_max[offset])}° <span class="low">/ ${Math.round(daily.temperature_2m_min[offset])}°</span>`
+                : `--° <span class="low">/ --°</span>`;
+
+            cell.appendChild(dayLabel);
+            cell.appendChild(sky);
+            cell.appendChild(temp);
+            forecastElement.appendChild(cell);
         }
+    }
 
-        try {
-            const response = await fetch(QUOTERISM_PROXY_URL, {
-                method: "GET",
-                cache: "no-store"
-            });
+    function renderSunLine() {
+        sunLineElement.textContent = `Sunrise ${sunriseText} · Sunset ${sunsetText}`;
+    }
 
-            if (!response.ok) {
-                throw new Error("Quote service error");
-            }
-
-            const data = await response.json();
-            const quote = pickQuoteFromResponse(data);
-
-            if (!quote) {
-                throw new Error("No quote returned");
-            }
-
-            quoteTextElement.textContent = `“${getQuoteText(quote)}”`;
-            quoteAuthorElement.textContent = `— ${getQuoteAuthorName(quote)}`;
-
-
-            lastQuoteHourKey = hourKey;
-        } catch (error) {
-            setFallbackQuote("Quote unavailable. Check Worker, API key, or Wi‑Fi.");
-        }
+    function formatSunTime(isoString) {
+        if (!isoString || isoString.length < 16) return "--:--";
+        return formatTimeFromParts(Number(isoString.slice(11, 13)), Number(isoString.slice(14, 16)));
     }
 
     async function fetchWeather() {
-        weatherStatusElement.textContent = "Loading weather...";
-
-        const url = `https://api.open-meteo.com/v1/forecast?latitude=${HARD_CODED_LATITUDE}&longitude=${HARD_CODED_LONGITUDE}&current_weather=true&timezone=auto`;
-
         try {
-            const response = await fetch(url);
+            const response = await fetch(WEATHER_URL, { cache: "no-store" });
             if (!response.ok) {
                 throw new Error("Weather service error");
             }
 
             const data = await response.json();
-            const current = data.current_weather;
 
-            temperatureElement.textContent = `${Math.round(current.temperature)}°C`;
-            windElement.textContent = `${Math.round(current.windspeed)} km/h`;
-            weatherTextElement.textContent = weatherDescriptions[current.weathercode] || "OK";
+            // Newer Open-Meteo responses use "current"; fall back to the legacy shape.
+            const current = data.current || data.current_weather || {};
+            const temperature = current.temperature_2m !== undefined ? current.temperature_2m : current.temperature;
+            const windSpeed = current.wind_speed_10m !== undefined ? current.wind_speed_10m : current.windspeed;
+            const code = current.weather_code !== undefined ? current.weather_code : current.weathercode;
 
-            const updateTime = new Date(current.time);
-            weatherStatusElement.textContent = `Updated ${pad(updateTime.getHours())}:${pad(updateTime.getMinutes())}`;
-            fetchQuote(false);
+            temperatureElement.textContent = `${Math.round(temperature)}°`;
+            weatherTextElement.textContent = describeWeather(code);
+            windElement.textContent = `${Math.round(windSpeed)} km/h`;
+
+            feelsLikeElement.textContent = current.apparent_temperature !== undefined
+                ? `${Math.round(current.apparent_temperature)}°`
+                : "--";
+
+            humidityElement.textContent = current.relative_humidity_2m !== undefined
+                ? `${Math.round(current.relative_humidity_2m)}%`
+                : "--";
+
+            if (data.daily) {
+                todayHighElement.textContent = `${Math.round(data.daily.temperature_2m_max[0])}°`;
+                todayLowElement.textContent = `${Math.round(data.daily.temperature_2m_min[0])}°`;
+                sunriseText = formatSunTime(data.daily.sunrise[0]);
+                sunsetText = formatSunTime(data.daily.sunset[0]);
+                renderForecast(data.daily);
+            }
+
+            renderSunLine();
+            weatherStatusElement.textContent = `Updated ${formatISTTime(getISTNow())}`;
         } catch (error) {
-            weatherStatusElement.textContent = "Weather unavailable. Check Wi‑Fi.";
+            weatherStatusElement.textContent = "Weather unavailable — check Wi‑Fi";
+        } finally {
+            fitClock(true);
         }
     }
+
+    async function fetchAirQuality() {
+        try {
+            const response = await fetch(AIR_URL, { cache: "no-store" });
+            if (!response.ok) {
+                throw new Error("Air quality service error");
+            }
+
+            const data = await response.json();
+            const aqi = data && data.current ? data.current.us_aqi : null;
+
+            if (aqi === null || aqi === undefined) {
+                throw new Error("No AQI value");
+            }
+
+            airQualityElement.textContent = `${Math.round(aqi)} ${aqiLabel(aqi)}`;
+        } catch (error) {
+            airQualityElement.textContent = "--";
+        } finally {
+            fitClock(true);
+        }
+    }
+
+    /* ---------------- Wiring ---------------- */
 
     settingsToggle.addEventListener("click", () => {
         settingsCard.classList.toggle("open");
@@ -1006,10 +1216,14 @@
         applyTimeFormat(timeFormatSelect.value);
     });
 
+    window.addEventListener("resize", updateLayoutMode);
+    window.addEventListener("orientationchange", updateLayoutMode);
+
     document.addEventListener("visibilitychange", () => {
         if (document.visibilityState === "visible") {
             tryKeepAwake();
             updateClock();
+            updateLayoutMode();
         }
     });
 
@@ -1019,9 +1233,14 @@
 
     loadSavedSettings();
     updateClock();
-    fetchQuote(true);
+    renderForecast(null);
+    fitClock(true);
     fetchWeather();
+    fetchAirQuality();
     tryKeepAwake();
+
+    // One more pass once fonts have settled, in case the first measure was early.
+    setTimeout(() => fitClock(true), 400);
 
     // Updates every minute and aligns close to the next minute change.
     const millisecondsUntilNextMinute = (60 - new Date().getSeconds()) * 1000;
@@ -1030,14 +1249,16 @@
         tinyRefreshSignal();
         setInterval(() => {
             updateClock();
-            fetchQuote(false);
             tinyRefreshSignal();
             tryKeepAwake();
         }, 60 * 1000);
     }, millisecondsUntilNextMinute);
 
-    // Weather refreshes every 30 minutes.
-    setInterval(fetchWeather, 30 * 60 * 1000);
+    // Weather and air quality refresh every 30 minutes.
+    setInterval(() => {
+        fetchWeather();
+        fetchAirQuality();
+    }, 30 * 60 * 1000);
 </script>
 </body>
 </html>
